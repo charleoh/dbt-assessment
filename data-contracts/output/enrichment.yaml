@@ -1,0 +1,140 @@
+id: enrichment
+info:
+  title: Enrichment Reports
+  description: |
+    Enriched reporting tables generated from procurement and bidding data.
+    These tables serve as the final analytical layer for dashboard consumption.
+
+models:
+  rpt_enrichment_companies:
+    description: |
+      Enriched view of companies (suppliers) showing their bidding activity,
+      procurement participation, and winning status. Like a comprehensive
+      company scorecard that shows all their competitive activities.
+    type: object
+    fields:
+      supplier_name:
+        description: Name of the supplier company
+        example: "Skipfire"
+        type: string
+        required: true
+      buyer_name:
+        description: Name of the organization issuing the procurement
+        example: "Government"
+        type: string
+      published_date:
+        description: Date when the procurement was published
+        example: "2020-06-23"
+        type: date
+        pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+      procurement_title:
+        description: Title/name of the procurement opportunity
+        example: "Detention Equipment"
+        type: string
+      procurement_content:
+        description: Detailed content/description of the procurement
+        example: "ipsum dolor sit amet consectetuer adipiscing"
+        type: string
+      project_id:
+        description: Unique identifier for the project
+        example: "01JETEMDG1VG8504XC6WDD4JWF"
+        type: string
+      project_name:
+        description: Name of the project associated with procurement
+        example: "Infrastructure Modernization Project"
+        type: string
+      is_winner:
+        description: Boolean flag indicating if supplier won this procurement
+        example: true
+        type: boolean
+        required: true
+      winner_bid_currency:
+        description: Currency of the winning bid amount
+        example: "¥"
+        type: string
+      winner_bid_value:
+        description: Monetary value of the winning bid
+        example: 67791147.77
+        type: decimal
+        precision: 15
+        scale: 2
+
+  rpt_enrichment_procurements:
+    description: |
+      A table that contains one procurement per row, also containing information about the bids.
+      Comprehensive procurement analysis with aggregated bidding statistics.
+    type: object
+    fields:
+      procurement_title:
+        description: Title/name of the procurement opportunity
+        example: "Detention Equipment"
+        type: string
+      published_date:
+        description: Date when the procurement was published
+        example: "2020-06-23"
+        type: date
+        pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+      buyer_name:
+        description: Name of the organization issuing the procurement
+        example: "Government"
+        type: string
+      project_id:
+        description: Unique identifier for the project
+        example: "01JETEMDG1VG8504XC6WDD4JWF"
+        type: string
+      project_name:
+        description: Name of the project associated with procurement
+        example: "Infrastructure Modernization Project"
+        type: string
+      is_won:
+        description: Boolean flag indicating if procurement has been awarded
+        example: true
+        type: boolean
+        required: true
+      bid_keys:
+        description: Array of unique bid identifiers for this procurement
+        example: [2959151762889312631, 12391026630201519075, 73199912673238425626]
+        type: array
+        items:
+          type: integer
+      supplier_keys:
+        description: Array of unique supplier identifiers who bid
+        example: [15192199527104287257, 16633122505933636672, 157682129082583287913]
+        type: array
+        items:
+          type: integer
+      supplier_names:
+        description: Array of supplier names who participated in bidding
+        example: ["Skipfire", "TechCorp", "BuildCo"]
+        type: array
+        items:
+          type: string
+      min_bid_value:
+        description: Lowest bid amount received for this procurement
+        example: 45000000.00
+        type: decimal
+        precision: 15
+        scale: 2
+      max_bid_value:
+        description: Highest bid amount received for this procurement
+        example: 85000000.00
+        type: decimal
+        precision: 15
+        scale: 2
+      avg_bid_value:
+        description: Average bid amount for this procurement
+        example: 67791147.77
+        type: decimal
+        precision: 15
+        scale: 2
+      median_bid_value:
+        description: Median bid amount for this procurement
+        example: 65000000.00
+        type: decimal
+        precision: 15
+        scale: 2
+      number_of_bids:
+        description: Total count of bids received for this procurement
+        example: 5
+        type: integer
+        required: true

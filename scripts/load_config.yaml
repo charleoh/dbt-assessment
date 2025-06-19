@@ -1,0 +1,70 @@
+schema: landing
+
+tables:
+  bids_12:
+    path: datasets/bids/bids_12.jsonl
+    columns:
+      supplier: string
+      procurement_number: int
+      value: string
+      date_accessed: string
+      source: string
+
+  procurements_12:
+    path: datasets/procurements/procurements_12.jsonl
+    columns:
+      id: string
+      type: string
+      buyer: string
+      title: string
+      project_id: string
+      publish_date: string
+      date_accessed: string
+      source: string
+      procurement_number: int
+
+  bids_34:
+    path: datasets/bids/bids_34.jsonl
+    columns:
+      supplier: string
+      procurement_number: int
+      value: string
+      date_accessed: string
+      source: string
+
+  procurements_34:
+    path: datasets/procurements/procurements_34.jsonl
+    columns:
+      id: string
+      type: string
+      buyer: string
+      title: string
+      project_name: string
+      project_identity: string
+      publish_date: string
+      date_accessed: string
+      source: string
+      procurement_number: int
+
+  bids_56:
+    path: datasets/bids/bids_56.jsonl
+    columns:
+      supplier: string
+      procurement_number: int
+      value: string
+      date_accessed: string
+      source: string
+
+  procurements_56:
+    path: datasets/procurements/procurements_56.jsonl
+    columns:
+      id: string
+      type: string
+      buyer: string
+      title: string
+      content: string
+      project_id: string
+      publish_date: string
+      date_accessed: string
+      source: string
+      procurement_number: int

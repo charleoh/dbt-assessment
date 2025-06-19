@@ -1,0 +1,90 @@
+id: source_34
+info:
+  title: Source 34
+  description: |
+    Data from Source 34 Procurements.
+
+models:
+  bids:
+    description: |
+        JSONL file containing multiple JSON objects.
+        Each JSON object is one bid.
+    type: object
+    fields:
+      supplier:
+        description: Name of the bidder.
+        example: "Skipfire"
+        type: string
+      procurement_number:
+        description: Number of the Procurement the bid is related with.
+        example: "100"
+        type: number
+        required: true
+        references: procurements.procurement_number
+      value:
+        description: Bid monetary value in original string format, including currency.
+        example: "¥67791147.77"
+        type: string
+      # Metadata #####
+      date_accessed:
+        description: Date when the data was scraped.
+        example: "2024-09-29"
+        type: string
+        required: true
+        pattern : ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+      source:
+        description: Source code of the procurements.
+        example: "56"
+        type: string
+        required: true
+
+  procurements:
+    description: |
+        JSONL file containing multiple JSON objects.
+        Each JSON object is one procurement.
+    type: object
+    fields:
+      id:
+        description: Unique identifier of the procurement.
+        example: "e36e310a-a027-46b5-9af5-0aa00180254d"
+        type: string
+        required: true
+      type:
+        description: Type of announcement made regarding the procurement.
+        example: "announcement of winning bid"
+        type: string
+      buyer:
+        description: Name of the buyer organization.
+        example: "Government"
+        type: string
+      title:
+        description: Title of the procurement content.
+        example: "11-190 - Detention Equipment"
+        type: string
+      project_name:
+        description: Project name assigned to the procurement.
+        type: string
+      project_identity:
+        description: Project number or ID assigned to the procurement.
+        example: "01JETEMDG1VG8504XC6WDD4JWF"
+        type: string
+      publish_date:
+        description: Date when the procurement has been published on the source website.
+        example: "6/23/2020"
+        type: string
+      # Metadata #####
+      date_accessed:
+        description: Date when the data was scraped.
+        example: "2022-12-31"
+        type: string
+        required: true
+        pattern : ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+      source:
+        description: Source code of the procurements.
+        example: "34"
+        type: string
+        required: true
+      procurement_number:
+        description: Number of the procurement in this source.
+        example: "100"
+        type: number

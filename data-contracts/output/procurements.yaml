@@ -1,0 +1,46 @@
+id: procurements
+info:
+  title: Procurement Report
+  description: |
+    Page containing a table with all procurements that we can display.
+
+models:
+  rpt_procurements_page:
+    description: |
+      Summary view of procurements optimized for procurement listing pages.
+      Like a marketplace listing that shows key procurement details at a glance.
+    type: object
+    fields:
+      procurement_title:
+        description: Title/name of the procurement opportunity
+        example: "Detention Equipment"
+        type: string
+        required: true
+      published_date:
+        description: Date when the procurement was published
+        example: "2020-06-23"
+        type: date
+        pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+      buyer_name:
+        description: Name of the organization issuing the procurement
+        example: "Government"
+        type: string
+      winner_bid_supplier_name:
+        description: Name of the supplier who won the procurement
+        example: "Skipfire"
+        type: string
+      winner_bid_currency:
+        description: Currency of the winning bid amount
+        example: "¥"
+        type: string
+      winner_bid_value:
+        description: Monetary value of the winning bid
+        example: 67791147.77
+        type: decimal
+        precision: 15
+        scale: 2
+      number_of_bids:
+        description: Total count of bids received for this procurement
+        example: 5
+        type: integer
+        required: true

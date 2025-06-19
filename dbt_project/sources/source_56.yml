@@ -1,0 +1,65 @@
+version: 2
+
+sources:
+  - name: source_56
+    schema: landing
+    tables:
+      - name: bids_56
+        description: "Bids from Source 56"
+        meta:
+          contract:
+            enforced: true
+        columns:
+          - name: supplier
+            data_type: string
+          - name: procurement_number
+            data_type: integer
+            tests:
+              - not_null
+          - name: value
+            data_type: string
+          - name: date_accessed
+            data_type: string
+            tests:
+              - not_null
+              - dbt_expectations.expect_column_values_to_match_regex:
+                  regex: '^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$'
+          - name: source
+            data_type: string
+            tests:
+              - not_null
+
+      - name: procurements_56
+        description: "Procurements from Source 56"
+        meta:
+          contract:
+            enforced: true
+        columns:
+          - name: id
+            data_type: string
+            tests:
+              - not_null
+          - name: type
+            data_type: string
+          - name: buyer
+            data_type: string
+          - name: title
+            data_type: string
+          - name: content
+            data_type: string
+          - name: project_id
+            data_type: string
+          - name: publish_date
+            data_type: string
+          - name: date_accessed
+            data_type: string
+            tests:
+              - not_null
+              - dbt_expectations.expect_column_values_to_match_regex:
+                  regex: '^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$'
+          - name: source
+            data_type: string
+            tests:
+              - not_null
+          - name: procurement_number
+            data_type: integer

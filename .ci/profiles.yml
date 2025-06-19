@@ -1,0 +1,11 @@
+dbt_project: # must match the 'profile' key
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
+  outputs:
+    dev:
+      type: duckdb
+      path: "../{{ env_var('DATABASE_NAME', 'dev.duckdb') }}"
+      threads: 4
+    prod:
+      type: duckdb
+      path: "../{{ env_var('DATABASE_NAME')}}"
+      threads: 4

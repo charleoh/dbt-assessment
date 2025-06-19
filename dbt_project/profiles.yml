@@ -1,0 +1,6 @@
+dbt_project: # This matches the "profile" setting in your dbt_project.yml
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: "../local.duckdb"

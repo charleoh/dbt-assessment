@@ -1,0 +1,170 @@
+version: 2
+
+models:
+  - name: dim_buyer
+    description: "Dimension table for buyers with unique buyer hashes and their names."
+    columns:
+      - name: buyer_key
+        description: "Hash of the procurement in this source (derived from buyer name)"
+        tests:
+          - not_null
+          - unique
+      - name: name
+        description: "Name of the buyer, used to identify the buyer across procurements"
+        tests:
+          - not_null
+      - name: date_accessed
+        description: "Date when the data was scraped"
+      - name: load_datetime
+        description: "The date and time when the data was loaded into the warehouse"
+  - name: dim_procurement_history
+    description: "Dimension table for procurement history with slowly changing dimension logic."
+    config:
+      tags: ["procurement"]
+    tests:
+      - valid_date_range:
+          valid_from_column: "valid_from"
+          valid_to_column: "valid_to"
+    columns:
+      - name: procurement_key
+        description: "Hash of the procurement in this source (derived from procurement_key)"
+        tests:
+          - not_null
+
+      - name: title
+        description: "Title of the procurement content (identification codes removed)"
+        tests:
+          - not_null
+
+      - name: content
+        description: "Description of the procurement, carried forward from previous announcements if current announcement has null content"
+
+      - name: project_id
+        description: "Project number or ID assigned to the procurement, carried forward from previous announcements if current announcement has null project_id"
+
+      - name: project_name
+        description: "Project name assigned to the procurement, carried forward from previous announcements if current announcement has null project_name"
+
+      - name: buyer_hash
+        description: "Hash of the buyer's name, used to identify the buyer across procurements"
+
+      - name: publish_date
+        description: "Date when the procurement has been published on the source website"
+
+      - name: date_accessed
+        description: "Date when the data was scraped"
+        tests:
+          - not_null
+
+      - name: source
+        description: "Source code of the procurements"
+        tests:
+          - not_null
+
+      - name: load_datetime
+        description: "The date and time when the data was loaded into the warehouse"
+        tests:
+          - not_null
+
+      - name: valid_from
+        description: "Start date for this version of the procurement record (same as publish_date)"
+
+      - name: valid_to
+        description: "End date for this version of the procurement record (null if current/latest version)"
+  - name: dim_procurement
+    description: "Dimension table for procurement using slowly changing dimension logic for latest."
+    config:
+      tags: ["procurement"]
+    tests:
+      - valid_date_range:
+          valid_from_column: "valid_from"
+          valid_to_column: "valid_to"
+    columns:
+      - name: procurement_key
+        description: "Hash of the procurement in this source (derived from procurement_key)"
+        tests:
+          - not_null
+          - unique
+
+      - name: title
+        description: "Title of the procurement content (identification codes removed)"
+
+      - name: content
+        description: "Description of the procurement, carried forward from previous announcements if current announcement has null content"
+
+      - name: project_id
+        description: "Project number or ID assigned to the procurement, carried forward from previous announcements if current announcement has null project_id"
+
+      - name: project_name
+        description: "Project name assigned to the procurement, carried forward from previous announcements if current announcement has null project_name"
+
+      - name: buyer_hash
+        description: "Hash of the buyer's name, used to identify the buyer across procurements"
+
+      - name: publish_date
+        description: "Date when the procurement has been published on the source website"
+
+      - name: date_accessed
+        description: "Date when the data was scraped"
+
+      - name: source
+        description: "Source code of the procurements"
+
+      - name: load_datetime
+        description: "The date and time when the data was loaded into the warehouse"
+
+      - name: valid_from
+        description: "Start date for this version of the procurement record (same as publish_date)"
+
+      - name: valid_to
+        description: "End date for this version of the procurement record (null if current/latest version)"
+
+  - name: dim_supplier
+    description: "Dimension table for supplier with unique supplier hashes and their names."
+    columns:
+      - name: supplier_key
+        description: "Hash of the procurement in this source (derived from procurement_key)"
+        tests:
+          - not_null
+          - unique
+      - name: name
+        description: "Name of the supplier, used to identify the name across bids"
+        tests:
+          - not_null
+      - name: date_accessed
+        description: "Date when the data was scraped"
+      - name: load_datetime
+        description: "The date and time when the data was loaded into the warehouse"
+  - name: fct_bid
+    description: "Fact table for bids."
+    config:
+      tags: ["bid"]
+    columns:
+      - name: supplier_key
+        description: "Foreign key for the supplier in this source (derived from supplier name)"
+        tests:
+          - not_null
+        relationships:
+          to: ref('dim_supplier')
+          field: supplier_key
+      - name: bid_key
+        description: "Hash of the bid in this source (derived from supplier, source, procurement_number"
+        tests:
+          - not_null
+      - name: procurement_key
+        description: "Foreign key for the procurement in this source (derived from source, procurement_number)"
+        tests:
+          - not_null
+        relationships:
+          to: ref('dim_procurement')
+          field: procurement_key
+      - name: value_currency
+        description: "Currency of the bid value, used to identify the currency of the bid"
+      - name: value_amount
+        description: "Value of the bid, used to identify the amount of the bid"
+      - name: date_accessed
+        description: "Date when the data was scraped"
+      - name: source
+        description: "Source code of the bid's supplier"
+      - name: load_datetime
+        description: "The date and time when the data was loaded into the warehouse"

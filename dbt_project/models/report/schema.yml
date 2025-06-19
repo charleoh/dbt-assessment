@@ -1,0 +1,334 @@
+version: 2
+
+models:
+  - name: rpt_enrichment_companies
+    description: >
+      Enriched view of companies (suppliers) showing their bidding activity,
+      procurement participation, and winning status. Like a comprehensive
+      company scorecard that shows all their competitive activities.
+    contract:
+      enforced: true
+    columns:
+      - name: supplier_name
+        description: "Name of the supplier company"
+        data_type: string
+        constraints:
+          - type: not_null
+        tests:
+          - not_null
+          - dbt_utils.not_empty_string
+        meta:
+          dashboard_usage: "Primary grouping dimension for supplier analysis"
+
+      - name: buyer_name
+        description: "Name of the organization issuing the procurement"
+        data_type: string
+        meta:
+          dashboard_usage: "Secondary grouping dimension for buyer analysis"
+
+      - name: published_date
+        description: "Date when the procurement was published"
+        data_type: date
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= '2000-01-01'"
+        meta:
+          dashboard_usage: "Time dimension for trend analysis and filtering"
+
+      - name: procurement_title
+        description: "Title/name of the procurement opportunity"
+        data_type: string
+        meta:
+          dashboard_usage: "Drill-down detail and search functionality"
+
+      - name: procurement_content
+        description: "Detailed content/description of the procurement"
+        data_type: string
+        meta:
+          dashboard_usage: "Tooltip or detail view content"
+
+      - name: project_id
+        description: "Unique identifier for the project"
+        data_type: string
+        meta:
+          dashboard_usage: "Linking to project-level analysis"
+
+      - name: project_name
+        description: "Name of the project associated with procurement"
+        data_type: string
+        meta:
+          dashboard_usage: "Project-level grouping and filtering"
+
+      - name: is_winner
+        description: "Boolean flag indicating if supplier won this procurement"
+        data_type: boolean
+        constraints:
+          - type: not_null
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+        meta:
+          dashboard_usage: "Key performance indicator for win rate calculations"
+
+      - name: winner_bid_currency
+        description: "Currency of the winning bid amount"
+        data_type: string
+        tests:
+          - accepted_values:
+              values: ["¥"]
+              config:
+                where: "winner_bid_currency IS NOT NULL"
+        meta:
+          dashboard_usage: "Currency context for financial metrics"
+
+      - name: winner_bid_value
+        description: "Monetary value of the winning bid"
+        data_type: DECIMAL(15,2)
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+              config:
+                where: "winner_bid_value IS NOT NULL"
+        meta:
+          dashboard_usage: "Primary financial KPI for contract value analysis"
+
+  - name: rpt_procurements_page
+    description: >
+      Summary view of procurements optimized for procurement listing pages.
+      Like a marketplace listing that shows key procurement details at a glance.
+
+    # Data Contract - Dashboard Input Specification
+    contract:
+      enforced: true
+
+    columns:
+      - name: procurement_title
+        description: "Title/name of the procurement opportunity"
+        data_type: string
+        constraints:
+          - type: not_null
+        tests:
+          - not_null
+          - dbt_utils.not_empty_string
+        meta:
+          dashboard_usage: "Primary display field and search target"
+
+      - name: published_date
+        description: "Date when the procurement was published"
+        data_type: date
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= '2000-01-01'"
+        meta:
+          dashboard_usage: "Sort dimension and date range filtering"
+
+      - name: buyer_name
+        description: "Name of the organization issuing the procurement"
+        data_type: string
+        meta:
+          dashboard_usage: "Buyer filtering and organization analysis"
+
+      - name: winner_bid_supplier_name
+        description: "Name of the supplier who won the procurement"
+        data_type: string
+        meta:
+          dashboard_usage: "Winner identification and supplier success tracking"
+
+      - name: winner_bid_currency
+        description: "Currency of the winning bid amount"
+        data_type: string
+        tests:
+          - accepted_values:
+              values: ["¥"]
+              config:
+                where: "winner_bid_currency IS NOT NULL"
+        meta:
+          dashboard_usage: "Financial display context"
+
+      - name: winner_bid_value
+        description: "Monetary value of the winning bid"
+        data_type: DECIMAL(15,2)
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+              config:
+                where: "winner_bid_value IS NOT NULL"
+        meta:
+          dashboard_usage: "Contract value display and financial analysis"
+
+      - name: number_of_bids
+        description: "Total count of bids received for this procurement"
+        data_type: bigint
+        constraints:
+          - type: not_null
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+        meta:
+          dashboard_usage: "Competition level indicator and engagement metric"
+
+  - name: rpt_enrichment_procurements
+    description: A table that contains one procurement per row, also containing information about the bids.
+    contract:
+      enforced: true
+    columns:
+      - name: procurement_title
+        description: "Title/name of the procurement opportunity"
+        data_type: string
+        meta:
+          dashboard_usage: "Primary identifier for procurement deep-dive analysis"
+
+      - name: published_date
+        description: "Date when the procurement was published"
+        data_type: date
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= '2000-01-01'"
+              config:
+                where: "published_date IS NOT NULL"
+        meta:
+          dashboard_usage: "Time-series analysis and trend identification"
+
+      - name: buyer_name
+        description: "Name of the organization issuing the procurement"
+        data_type: string
+        meta:
+          dashboard_usage: "Buyer performance and behavior analysis"
+
+      - name: project_id
+        description: "Unique identifier for the project"
+        data_type: string
+        meta:
+          dashboard_usage: "Project portfolio tracking and analysis"
+
+      - name: project_name
+        description: "Name of the project associated with procurement"
+        data_type: string
+        meta:
+          dashboard_usage: "Project-level grouping and cross-reference"
+
+      - name: is_won
+        description: "Boolean flag indicating if procurement has been awarded"
+        data_type: boolean
+        constraints:
+          - type: not_null
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+        meta:
+          dashboard_usage: "Status filtering and completion tracking"
+
+      - name: bid_keys
+        description: "Array of unique bid identifiers for this procurement"
+        data_type: UBIGINT[]
+        meta:
+          dashboard_usage: "Detail drill-down and bid-level analysis linking"
+
+      - name: supplier_keys
+        description: "Array of unique supplier identifiers who bid"
+        data_type: UBIGINT[]
+        meta:
+          dashboard_usage: "Supplier participation analysis and network mapping"
+
+      - name: supplier_names
+        description: "Array of supplier names who participated in bidding"
+        data_type: VARCHAR[]
+        meta:
+          dashboard_usage: "Human-readable supplier participation display"
+
+      - name: min_bid_value
+        description: "Lowest bid amount received for this procurement"
+        data_type: DECIMAL(15,2)
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+              config:
+                where: "min_bid_value IS NOT NULL"
+        meta:
+          dashboard_usage: "Competitive pricing analysis - floor price"
+
+      - name: max_bid_value
+        description: "Highest bid amount received for this procurement"
+        data_type: DECIMAL(15,2)
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+              config:
+                where: "max_bid_value IS NOT NULL"
+          - dbt_utils.expression_is_true:
+              expression: ">= min_bid_value"
+              config:
+                where: "max_bid_value IS NOT NULL AND min_bid_value IS NOT NULL"
+        meta:
+          dashboard_usage: "Competitive pricing analysis - ceiling price"
+
+      - name: avg_bid_value
+        description: "Average bid amount for this procurement"
+        data_type: DECIMAL(15,2)
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+              config:
+                where: "avg_bid_value IS NOT NULL"
+          - dbt_utils.expression_is_true:
+              expression: "BETWEEN min_bid_value AND max_bid_value"
+              config:
+                where: "avg_bid_value IS NOT NULL AND min_bid_value IS NOT NULL AND max_bid_value IS NOT NULL"
+        meta:
+          dashboard_usage: "Market pricing benchmark and central tendency"
+
+      - name: median_bid_value
+        description: "Median bid amount for this procurement"
+        data_type: DECIMAL(15,2)
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+              config:
+                where: "median_bid_value IS NOT NULL"
+        meta:
+          dashboard_usage: "Robust pricing benchmark less affected by outliers"
+
+      - name: number_of_bids
+        description: "Total count of bids received for this procurement"
+        data_type: bigint
+        constraints:
+          - type: not_null
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+          - dbt_utils.expression_is_true:
+              expression: "= ARRAY_LENGTH(bid_keys)"
+              config:
+                where: "bid_keys IS NOT NULL"
+        meta:
+          dashboard_usage: "Competition intensity metric and market interest indicator"
+
+# Exposures
+exposures:
+  - name: procurement_page
+    type: dashboard
+    maturity: low
+    description: "This will be a page containing a table with all procurements that we can display."
+    depends_on:
+      - ref('rpt_procurements_page')
+    owner:
+      name: "Serving Team"
+      email: "serving@datenna.com"
+
+  - name: enrichment_reports
+    type: dashboard
+    maturity: low
+    description: >
+      The platform has a page for each company with details such as its operating status or website.
+      On this page, a table with all procurements the given company participated in (bidded on) will be presented.
+      The procurements this company has won will be flagged in this UI.
+    depends_on:
+      - ref('rpt_enrichment_companies')
+      - ref('rpt_enrichment_procurements')
+    owner:
+      name: "Serving Team"
+      email: "serving@datenna.com"

@@ -1,0 +1,83 @@
+name: dbt CI/CD
+
+env:
+  DBT_PROFILES_DIR: ${{ github.workspace }}/.ci
+  PYTHONUNBUFFERED: "1"
+  DATABASE_NAME: ${{ github.ref == 'refs/heads/main' && 'prod.duckdb' || 'dev.duckdb' }}
+
+on:
+  pull_request:
+    branches: ["**"]
+  push:
+    branches: ["main"]
+
+jobs:
+  dbt:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -e {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          cd dbt_project
+          dbt deps
+
+      # ------------------------- DEV (pull-request) -------------------------
+      - name: Load raw JSONL to DEV DB
+        if: ${{ github.event_name == 'pull_request' }}
+        run: python scripts/load_jsonl_to_duckdb.py
+
+      - name: Build & test DEV models (tag order)
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          DBT_TARGET: dev
+        working-directory: dbt_project
+        run: |
+          dbt run  --target $DBT_TARGET --select tag:staging
+          dbt test --target $DBT_TARGET --select tag:staging
+          dbt run  --target $DBT_TARGET --select tag:intermediate
+          dbt test --target $DBT_TARGET --select tag:intermediate
+          dbt run  --target $DBT_TARGET --select tag:mart
+          dbt test --target $DBT_TARGET --select tag:mart
+          dbt run  --target $DBT_TARGET --select tag:report
+          dbt test --target $DBT_TARGET --select tag:report
+
+      # ------------------------- PROD (main) -------------------------------
+      - name: Load raw JSONL to PROD DB
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: python scripts/load_jsonl_to_duckdb.py
+
+      - name: Build & test PROD models (full run)
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        env:
+          DBT_TARGET: prod
+        working-directory: dbt_project
+        run: |
+          dbt run  --target $DBT_TARGET
+          dbt test --target $DBT_TARGET
+      # ---------------------- store DuckDB file ----------------------------
+      - name: Upload DuckDB
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.DATABASE_NAME }}
+          path: ${{ env.DATABASE_NAME }}
+          retention-days: 7
+      # ---------------------- store dbt artefacts ---------------------------
+      - name: Upload dbt target folder
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-target
+          path: dbt_project/target/
