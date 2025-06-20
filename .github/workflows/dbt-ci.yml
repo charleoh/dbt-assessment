@@ -10,7 +10,7 @@ on:
     branches: ["main"]
 
 jobs:
-  dbt:
+  dbt-ci:
     runs-on: ubuntu-latest
     defaults:
       run:
