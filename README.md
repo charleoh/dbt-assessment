@@ -7,6 +7,7 @@ A modern data pipeline built with dbt and DuckDB, featuring automated testing an
 - **[Assessment Instructions](docs/instructions.md)** - Original requirements and evaluation criteria
 - **[Output Description](docs/output-description.md)** - Provided explanation of deliverables and results
 - **[Decision Tracking](docs/decisions.md)** - Architectural decisions and rationale behind implementation choices
+- **[Data Contracts](data-contracts/)** - Both the input and output contracts
 
 ## 🚀 Quick Start
 
