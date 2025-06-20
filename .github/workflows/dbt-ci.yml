@@ -1,0 +1,52 @@
+name: dbt_ci
+
+env:
+  PYTHONUNBUFFERED: "1"
+
+on:
+  pull_request:
+    branches: ["**"]
+  push:
+    branches: ["main"]
+
+jobs:
+  dbt:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -e {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      # ------------------------- DEV (pull-request) -------------------------
+      - name: Run DEV pipeline
+        if: ${{ github.event_name == 'pull_request' }}
+        run: make ENVIRONMENT=dev
+
+      # ------------------------- PROD (main) -------------------------------
+      - name: Run PROD pipeline
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: make ENVIRONMENT=prod
+
+      # ---------------------- store DuckDB file ----------------------------
+      - name: Upload DuckDB
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event_name == 'pull_request' && 'dev.duckdb' || 'prod.duckdb' }}
+          path: ${{ github.event_name == 'pull_request' && 'dev.duckdb' || 'prod.duckdb' }}
+          retention-days: 7
+
+      # ---------------------- store dbt artefacts ---------------------------
+      - name: Upload dbt target folder
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-target
+          path: dbt_project/target/
