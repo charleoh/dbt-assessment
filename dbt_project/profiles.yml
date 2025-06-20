@@ -1,6 +1,11 @@
 dbt_project: # This matches the "profile" setting in your dbt_project.yml
-  target: local
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
   outputs:
-    local:
+    dev:
       type: duckdb
-      path: "../local.duckdb"
+      path: "../{{ env_var('DATABASE_NAME', 'dev.duckdb') }}"
+      threads: 4
+    prod:
+      type: duckdb
+      path: "../{{ env_var('DATABASE_NAME')}}"
+      threads: 4
