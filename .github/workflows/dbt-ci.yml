@@ -8,7 +8,11 @@ on:
     branches: ["**"]
   push:
     branches: ["main"]
-
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: read
 jobs:
   dbt-ci:
     runs-on: ubuntu-latest
