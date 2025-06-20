@@ -21,8 +21,8 @@ A modern data pipeline built with dbt and DuckDB, featuring automated testing an
 1. **Clone the repository**
 
    ```bash
-   git clone <repository-url>
-   cd <project-directory>
+   git clone https://github.com/charleoh/dbt-assessment.git
+   cd dbt-assessment
    ```
 
 2. **Create and activate virtual environment**
