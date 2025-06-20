@@ -1,89 +1,159 @@
-# **Introduction**
-Dear Candidate,
+# dbt Pipeline Assessment
 
-Thank you for your interest in joining our team and for taking on this assignment. We appreciate your time and effort in working on this challenge. This task will help us evaluate your skills in building a scalable and maintainable data processing pipeline while adhering to business requirements and ensuring data quality.
+A modern data pipeline built with dbt and DuckDB, featuring automated testing and deployment through GitHub Actions.
 
-We look forward to seeing your approach and reviewing your solution. Your work will give us insight into your problem-solving and technical abilities.
+## 📋 Project Documentation
 
-Below, you will find the assignment description and requirements. If you have any questions, please don’t hesitate to contact us. Good luck!
+- **[Assessment Instructions](docs/instructions.md)** - Original requirements and evaluation criteria
+- **[Output Description](docs/output-description.md)** - Provided explanation of deliverables and results
+- **[Decision Tracking](docs/decisions.md)** - Architectural decisions and rationale behind implementation choices
 
+## 🚀 Quick Start
 
-# **Assignment Description**
+### Prerequisites
 
+- Python 3.10+
+- Git
+- Make (usually pre-installed on macOS/Linux, available via chocolatey/scoop on Windows)
 
-## **Overview**
+### Setup & Installation
 
-At Datenna, we integrate diverse types of data from multiple sources to deliver high-quality outputs on our platform.
+1. **Clone the repository**
 
-The procurement data you’ll be working with is a critical component of this mission. Agencies and Regulators rely on procurement data to make informed decisions about suppliers and ensure compliance with trade regulations.
-By processing and standardizing this data, you’ll be helping our clients gain actionable insights that drive strategic decision-making.
+   ```bash
+   git clone <repository-url>
+   cd <project-directory>
+   ```
 
-To enable this and many other usecases, we have a data processing pipeline that consists of three main steps:
+2. **Create and activate virtual environment**
 
-1. **Scraping** - Collecting raw data from various sources.
-2. **Processing** - Transforming raw data into structured, high-quality datasets.
-3. **Serving** - Delivering the processed data to consumers in a usable format.
+   ```bash
+   # Create virtual environment
+   python -m venv venv
 
-To ensure scalability and maintain our high-quality standards as we add new sources, we use **Data Contracts**. These contracts define the expectations for data at both the **ingestion side** (Scraping → Processing) and the **consumer side** (Processing → Serving).
+   # Activate virtual environment
+   # On macOS/Linux:
+   source venv/bin/activate
 
-This assignment will challenge you to define and implement a Data Contract for processing procurement data. You’ll also build the necessary pipeline components to ensure that the data adheres to these contracts and meets quality standards.
+   # On Windows:
+   venv\Scripts\activate
+   ```
 
+3. **Run the complete pipeline**
 
-## **Input**
+   ```bash
+   # Development environment (default)
+   make
+   ```
 
-* **Data Contracts**: A sample Data Contract defining the expectations for the input data.
-* **Dataset**: A procurement dataset consisting of multiple sources
-* **Expected Output Requirements**: A description of the expected output (e.g. business rules, data filtering rules, expected formatting, etc)
+That's it! The `make` command will automatically:
 
-Note that the input data and files are entirely mocked data, some inconsistencies may happen.
+- Install all Python dependencies
+- Set up dbt dependencies
+- Load raw data into DuckDB
+- Run the appropriate dbt pipeline based on environment
 
-## **Primary Task**
+## 🛠️ Available Commands
 
-* **Draft a Data Contract for the Output**:
-  * Define what the processed data should look like, based on the provided dataset and expected output requirements.
-* **Build a dbt Pipeline**:
-  * Transform the raw data into processed data using the Dataset, Data Contract, and Expected Output Requirements.
-  * Ensure high-quality data output in line with the agreements specified in the contracts.
-* **Design a CI/CD Pipeline**:
-  * Propose a design for a continuous integration and deployment pipeline to automate testing and deployment.
+The project uses a Makefile to simplify common operations:
 
-## **Key Requirements**
+### Core Commands
 
-* **Explainability**: Ensure the results are interpretable and that it is clear how the system arrived at its outcomes.
-* **Maintainability**: Design a pipeline that is easy to maintain and scalable to accommodate new data sources.
-* **Documentation**: Provide clear and comprehensive documentation for your code and processes.
-* **Usability and Collaboration**: Ensure the project is runnable by other developers and that the documentation clearly explains how to set it up and use it.
+```bash
+# Run complete pipeline (development mode)
+make
 
+# Run complete pipeline (production mode)
+make ENVIRONMENT=prod
 
-## **Bonus Challenge**
+# Install dependencies only
+make install-deps
 
-* CI/CD implementation based on the proposed design.
-* Track and log significant decisions made during development for improved explainability using a Decision Tracking System.
+# Load raw data only
+make load-data
 
+# Run dbt pipeline only (development - staged approach)
+make dbt-dev
 
-## **Deliverables**
+# Run dbt pipeline only (production - full run)
+make dbt-prod
 
-* **Data Contract File**
-* **Source Code for the dbt Project**
-* **Documentation**: How to run the solution, additional documentation explaining the approach and design decisions.
+# Clean up generated files
+make clean
 
+# Show help
+make help
+```
 
-## **Evaluation Criteria**
+### Environment Differences
 
-* **Correctness and Effectiveness**: Does the solution meet the requirements and produce the expected results?
-* **Performance and Scalability**: Is the solution optimized for large datasets and scalable to new data sources?
-* **Creativity and Depth**: How innovative and thoughtful is the approach?
-* **Code Quality and Organization**: Is the code well-written, modular, and organized?
-* **Documentation**: Is the documentation clear, thorough, and helpful?
+**Development Mode** (`ENVIRONMENT=dev`):
 
+- Uses `dev.duckdb` database
+- Runs dbt models in staged order: staging → intermediate → mart → report
+- Includes comprehensive testing at each stage
 
-## **Submission Guidelines**
+**Production Mode** (`ENVIRONMENT=prod`):
 
-* Share the repository containing your solution
-* Include a README file with setup instructions and any additional notes
-* Submit your solution one week (seven days) after receiving this email
+- Uses `prod.duckdb` database
+- Runs all dbt models in a single execution
+- Optimized for performance and reliability
 
+## 🔄 CI/CD Pipeline
 
-## **Questions and Support**
+The project includes automated GitHub Actions workflows that:
 
-For any clarifications or questions regarding the assignment, please contact [paulo.filho@datenna.com](mailto:paulo.filho@datenna.com).
+- **Pull Requests**: Automatically run the development pipeline to validate changes
+- **Main Branch**: Deploy to production environment on merge
+- **Artifacts**: Store generated databases and dbt artifacts for inspection
+
+The CI/CD pipeline leverages the same Makefile commands used locally, ensuring consistency between development and deployment environments.
+
+## 📁 Project Structure
+
+```
+├── dbt_project/          # dbt models, tests, and configuration
+├── scripts/              # Data loading and utility scripts
+├── requirements.txt      # Python dependencies
+├── Makefile             # Build automation and task management
+├── .github/workflows/   # GitHub Actions CI/CD configuration
+└── *.duckdb            # Generated database files (git-ignored)
+```
+
+## 🧪 Testing
+
+Testing is integrated into the pipeline and runs automatically with each execution:
+
+```bash
+# Run tests for development environment
+make dbt-dev
+
+# Run tests for production environment
+make dbt-prod
+```
+
+Tests include data quality checks, schema validations, and business rule assertions defined in the dbt project.
+
+## 🔧 Troubleshooting
+
+**Common Issues:**
+
+- **Missing dependencies**: Run `make install-deps` to ensure all packages are installed
+- **Database locked**: Run `make clean` to remove any stale database files
+- **dbt compilation errors**: Check that all dbt dependencies are installed with `dbt deps`
+
+**Getting Help:**
+
+- Run `make help` to see all available commands
+- Check the [Decision Tracking](docs/decisions.md) document for implementation details
+- Review the [Output Description](docs/output-description.md) for expected results
+
+## 📊 Results
+
+After running the pipeline, you'll find:
+
+- Generated DuckDB databases (`dev.duckdb` or `prod.duckdb`)
+- dbt artifacts in `dbt_project/target/`
+- Detailed logs and test results
+
+---
