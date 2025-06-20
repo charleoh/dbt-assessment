@@ -3,9 +3,9 @@
 with bids_agg as (
     select 
         procurement_key,
-        ARRAY_AGG(fct_bid.bid_key) as bid_keys,
-        ARRAY_AGG(fct_bid.supplier_key) as supplier_keys,
-        ARRAY_AGG(dim_supplier.name) as supplier_names,
+        ARRAY_AGG(fct_bid.bid_key) as bid_keys, -- drill down on ID
+        ARRAY_AGG(fct_bid.supplier_key) as supplier_keys, -- drill down on ID
+        ARRAY_AGG(dim_supplier.name) as supplier_names, -- to be presented as a list
         MIN(fct_bid.value_amount)::DECIMAL(15,2) as min_bid_value, -- Minimum bid value
         MAX(fct_bid.value_amount)::DECIMAL(15,2) as max_bid_value, -- Maximum bid value
         AVG(fct_bid.value_amount)::DECIMAL(15,2) as avg_bid_value, -- Average bid value
