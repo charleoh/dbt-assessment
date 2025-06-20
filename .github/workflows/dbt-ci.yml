@@ -34,6 +34,11 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         run: make ENVIRONMENT=prod
 
+      # ---------------------- Generate dbt docs (PROD only) ----------------
+      - name: Generate docs
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: make ENVIRONMENT=prod dbt-docs
+
       # ---------------------- store DuckDB file ----------------------------
       - name: Upload DuckDB
         if: always()
@@ -50,3 +55,26 @@ jobs:
         with:
           name: dbt-target
           path: dbt_project/target/
+
+      # ---------------------- Deploy docs to GitHub Pages ------------------
+      - name: Setup Pages
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dbt_project/target/
+
+      - name: Deploy to GitHub Pages
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Print documentation URL
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+          echo "dbt documentation has been deployed!"
+          echo "📚 View your docs at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          echo "🔗 Direct link: ${{ steps.deployment.outputs.page_url }}"
