@@ -58,6 +58,12 @@ dbt-dev:
 	dbt run --target $(DBT_TARGET) --select tag:report && \
 	dbt test --target $(DBT_TARGET) --select tag:report
 
+# Generate documentation
+dbt-docs:
+	@echo "Generating dbt documentation"
+	cd dbt_project && \
+	dbt docs generate --target $(DBT_TARGET)
+
 # Clean up generated files (optional target)
 clean:
 	rm -f *.duckdb
@@ -71,6 +77,7 @@ help:
 	@echo "  load-data     - Load raw JSONL data to DuckDB"
 	@echo "  dbt-prod      - Run production DBT pipeline"
 	@echo "  dbt-dev       - Run development DBT pipeline"
+	@echo "  dbt-docs      - Generate dbt documentation"
 	@echo "  clean         - Clean up generated files"
 	@echo ""
 	@echo "Usage examples:"
